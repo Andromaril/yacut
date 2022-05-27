@@ -39,6 +39,7 @@ class URL_map_api(db.Model):
     custom_id = db.Column(db.String(6), nullable=False, unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
+
     def to_dict_post(self):
         return dict(  
             url = self.url,
