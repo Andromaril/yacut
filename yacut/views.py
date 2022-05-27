@@ -9,7 +9,6 @@ from . import app, db
 from .forms import URLForm
 from .models import URL_map
 
-
 def get_unique_short_id(number):
     letters_and_digits = string.ascii_letters + string.digits
     rand_string = ''.join(random.sample(letters_and_digits, number))
@@ -17,6 +16,7 @@ def get_unique_short_id(number):
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
+
     form = URLForm()
     if form.validate_on_submit():
     #if request.method == 'POST':
@@ -42,7 +42,7 @@ def index_view():
         return render_template('link.html', short_url=short_url, form = form)
 
     return render_template('link.html', form = form)
-
+    
 
 
 @app.route('/<short>')
@@ -52,4 +52,4 @@ def link_view(short):
         return redirect(link.original)
     else:
         flash('Нерабочая ссылка!')
-        return redirect(url_for('index_view'))
+        abort(404)

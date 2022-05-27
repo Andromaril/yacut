@@ -25,7 +25,7 @@ class URL_map(db.Model):
     def to_dict_post(self):
         return dict(
             url = self.original,
-            custom_id = self.short,
+            short_link = 'http://localhost/' + self.short,
         )
 
     def from_dict(self, data):

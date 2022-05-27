@@ -13,6 +13,12 @@ my_set = set()
 def add_link():
     
     data = request.get_json()
+
+    if 'custom_id' not in data:
+        data['custom_id'] = get_unique_short_id(6)
+
+    if not data['custom_id']:
+        data['custom_id'] = get_unique_short_id(6)
     
     if 'custom_id' in data:
         allowed_chars = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') 
@@ -21,16 +27,10 @@ def add_link():
             raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
     
     if 'url' not in data:
-        raise InvalidAPIUsage('В запросе отсутствуют обязательные поля', 400)
-    
-    if 'custom_id' not in data:
-        data['custom_id'] = get_unique_short_id(6)
-
-    if data['custom_id'] is None:
-        data['custom_id'] = get_unique_short_id(6)
+        raise InvalidAPIUsage('"url" является обязательным полем!', 400)
 
     if URL_map_api.query.filter_by(custom_id=data['custom_id']).first() is not None:
-        raise InvalidAPIUsage('В запросе отсутствуют обязательные поля', 400)
+        raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
 
     if len(data['custom_id']) > 16:
         raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
