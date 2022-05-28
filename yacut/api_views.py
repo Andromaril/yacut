@@ -13,14 +13,14 @@ def add_link():
     try:
         data = request.get_json()
         if data:
-            url = data['url']
-    except:
+            data['url']
+    except Exception:
         raise InvalidAPIUsage('"url" является обязательным полем!', 400)
 
     try:
         data = request.get_json()
-        url = data['url']
-    except:
+        data['url']
+    except Exception:
         raise InvalidAPIUsage('Отсутствует тело запроса', 400)
 
     if 'custom_id' not in data:
