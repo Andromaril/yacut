@@ -19,7 +19,6 @@ def index_view():
 
     form = URLForm()
     if form.validate_on_submit():
-    #if request.method == 'POST':
         original_link = form.original_link.data
         custom_id = form.custom_id.data
 
@@ -29,12 +28,11 @@ def index_view():
             flash(message)
             return redirect(url_for('index_view'))
 
-
         if not custom_id:
             custom_id = get_unique_short_id(6)
 
         new_link = URL_map(
-            original=original_link, short=custom_id, timestamp=datetime.now())
+            original=original_link, short=custom_id, url=original_link, custom_id=custom_id, timestamp=datetime.now())
         db.session.add(new_link)
         db.session.commit()
         short_url = request.host_url + custom_id

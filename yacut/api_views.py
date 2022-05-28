@@ -2,7 +2,7 @@ from flask import jsonify, request
 
 from . import app, db
 from .error_handlers import InvalidAPIUsage
-from .models import URL_map, URL_map_api
+from .models import URL_map
 from .views import get_unique_short_id
 
 my_set = set()
@@ -15,17 +15,12 @@ def add_link():
         data = request.get_json()
         if data:
             url = data['url']
-        #if 'custom_id' not in data:
-            #data['custom_id'] = get_unique_short_id(6)  
     except:
         raise InvalidAPIUsage('"url" является обязательным полем!', 400)
     
     try:
         data = request.get_json()
         url = data['url']
-        #custom_id=data['custom_id']
-        #if not data['custom_id']:
-           # data['custom_id'] = get_unique_short_id(6)
     except:
         raise InvalidAPIUsage('Отсутствует тело запроса', 400)
 
@@ -38,7 +33,7 @@ def add_link():
     if 'custom_id' in data:
         allowed_chars = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') 
         validationString = data['custom_id'] 
-        if set(validationString).issubset(allowed_chars) == False:
+        if set(validationString).issubset(allowed_chars) is False:
             raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
     
     #if 'url' not in data:
@@ -68,9 +63,6 @@ def get_opinion(short_id):
     
     #link1 = URL_map.query.get(id)
     link = URL_map.query.filter_by(short=short_id).first()
-
-    #if link1 is None:
-        #raise InvalidAPIUsage('Указанный id не найден', 404)
     if link is None:
         raise InvalidAPIUsage('Указанный id не найден', 404)
 
