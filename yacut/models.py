@@ -11,55 +11,26 @@ class URL_map(db.Model):
     custom_id = db.Column(db.String(6), nullable=False, unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    #def __init__(self, url, custom_id):
-        #self.url = url
-        #self.custom_id = custom_id
-
     def to_dict(self):
         return dict(
-            id = self.id,
-            original = self.original,
-            short = self.short,
-            timestamp = self.timestamp,
+            id=self.id,
+            original=self.original,
+            short=self.short,
+            timestamp=self.timestamp,
         )
-    
+
     def to_dict_original(self):
         return dict(
-            url = self.original,
+            url=self.original,
         )
 
     def to_dict_post(self):
         return dict(
-            url = self.url,
-            short_link = 'http://localhost/' + self.custom_id,
+            url=self.url,
+            short_link='http://localhost/' + self.custom_id,
         )
 
     def from_dict(self, data):
-        for field in ['url', 'custom_id',]:
+        for field in ['url', 'custom_id', ]:
             if field in data:
                 setattr(self, field, data[field])
-
-class URL_map_api(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    url= db.Column(db.String(256), nullable=False)
-    custom_id = db.Column(db.String(6), nullable=False, unique=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-
-    def to_dict_post(self):
-        return dict(  
-            url = self.url,
-            short_link = 'http://localhost/' + self.custom_id
-        )
-    
-    def to_dict_original(self):
-        return dict(
-            url = self.url,
-        )
-    
-    def from_dict(self, data):
-        for field in ['url', 'custom_id',]:
-            if field in data:
-                setattr(self, field, data[field])
-
-    

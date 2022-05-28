@@ -1,12 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, URLField
-from wtforms.validators import DataRequired, Length, Optional, ValidationError, InputRequired
+from wtforms import StringField
+from wtforms.validators import DataRequired, Length, ValidationError
+
 
 def my_length_check(form, field):
 
     allowed_chars = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     if field.data is not None:
-        if set(field.data).issubset(allowed_chars) == False:
+        if set(field.data).issubset(allowed_chars) is False:
             raise ValidationError('Указано недопустимое имя для короткой ссылки')
 
 
