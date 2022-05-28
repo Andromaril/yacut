@@ -1,7 +1,8 @@
 from flask import jsonify, request
 
 from . import app, db
-from .error_handlers import InvalidAPIUsage
+from .error_handlers import InvalidAPIUsage, except_errors
+
 from .models import URL_map
 from .views import get_unique_short_id
 
@@ -10,18 +11,8 @@ my_set = set()
 
 @app.route('/api/id/', methods=['POST'])
 def add_link():
-    try:
-        data = request.get_json()
-        if data:
-            data['url']
-    except Exception:
-        raise InvalidAPIUsage('"url" является обязательным полем!', 400)
-
-    try:
-        data = request.get_json()
-        data['url']
-    except Exception:
-        raise InvalidAPIUsage('Отсутствует тело запроса', 400)
+    data = request.get_json()
+    except_errors()
 
     if 'custom_id' not in data:
         data['custom_id'] = get_unique_short_id(6)

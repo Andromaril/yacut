@@ -1,4 +1,5 @@
 from flask import jsonify, render_template
+from flask import request
 
 from . import app, db
 
@@ -30,3 +31,18 @@ def page_not_found(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+
+def except_errors():
+    try:
+        data = request.get_json()
+        if data:
+            data['url']
+    except Exception:
+        raise InvalidAPIUsage('"url" является обязательным полем!', 400)
+
+    try:
+        data = request.get_json()
+        data['url']
+    except Exception:
+        raise InvalidAPIUsage('Отсутствует тело запроса', 400)
