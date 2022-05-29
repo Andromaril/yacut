@@ -1,42 +1,58 @@
+import re
+from http import HTTPStatus
+
 from flask import jsonify, request
 
-from . import app, db
-from .error_handlers import InvalidAPIUsage, except_errors
-
+from . import app, db, lenght_short_id
+from .error_handlers import InvalidAPIUsage
 from .models import URL_map
 from .views import get_unique_short_id
 
-my_set = set()
+
+def random(custom_id):
+    if URL_map.query.filter_by(short=custom_id).first() is not None:
+        message = (f'Имя {custom_id} уже занято, отправьте запрос ещё раз.')
+        raise InvalidAPIUsage(message, HTTPStatus.BAD_REQUEST)
 
 
 @app.route('/api/id/', methods=['POST'])
 def add_link():
-    data = request.get_json()
-    except_errors()
+
+    try:
+        data = request.get_json()
+        if data:
+            data['url']
+    except Exception:
+        raise InvalidAPIUsage('"url" является обязательным полем!', HTTPStatus.BAD_REQUEST)
+
+    try:
+        data = request.get_json()
+        data['url']
+    except Exception:
+        raise InvalidAPIUsage('Отсутствует тело запроса', HTTPStatus.BAD_REQUEST)
 
     if 'custom_id' not in data:
-        data['custom_id'] = get_unique_short_id(6)
+        data['custom_id'] = get_unique_short_id(lenght_short_id)
+        random(data['custom_id'])
 
-    if not data['custom_id']:
-        data['custom_id'] = get_unique_short_id(6)
-
-    if 'custom_id' in data:
-        allowed_chars = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-        validationString = data['custom_id']
-        if set(validationString).issubset(allowed_chars) is False:
-            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
+    elif not data['custom_id']:
+        data['custom_id'] = get_unique_short_id(lenght_short_id)
+        random(data['custom_id'])
+    else:
+        regex = "^[a-zA-Z0-9]{1,16}$"
+        string = data['custom_id']
+        pattern = re.compile(regex)
+        if (pattern.search(string) is None):
+            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', HTTPStatus.BAD_REQUEST)
 
     if URL_map.query.filter_by(short=data['custom_id']).first() is not None:
-        name_short = URL_map.query.filter_by(short=data['custom_id']).first().short
-        raise InvalidAPIUsage(f'Имя "{name_short}" уже занято.', 400)
+        name = data['custom_id']
+        raise InvalidAPIUsage(f'Имя "{name}" уже занято.', HTTPStatus.BAD_REQUEST)
 
-    if len(data['custom_id']) > 16:
-        raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
-
-    link = URL_map(original=data['url'], short=data['custom_id'], url=data['url'], custom_id=data['custom_id'])
+    link = URL_map(original=data['url'], short=data['custom_id'])
     db.session.add(link)
     db.session.commit()
-    return jsonify(link.to_dict_post()), 201
+    return jsonify(link.to_dict_post()), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<short_id>/', methods=['GET'])
@@ -44,6 +60,6 @@ def get_opinion(short_id):
 
     link = URL_map.query.filter_by(short=short_id).first()
     if link is None:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
+        raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
 
-    return jsonify(link.to_dict_original()), 200
+    return jsonify(link.to_dict_original()), HTTPStatus.OK

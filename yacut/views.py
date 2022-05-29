@@ -2,9 +2,9 @@ import random
 import string
 from datetime import datetime
 
-from flask import abort, flash, redirect, render_template, url_for, request
+from flask import flash, redirect, render_template, url_for
 
-from . import app, db
+from . import app, db, lenght_short_id
 from .forms import URLForm
 from .models import URL_map
 
@@ -23,19 +23,22 @@ def index_view():
         custom_id = form.custom_id.data
 
         if custom_id and URL_map.query.filter_by(short=custom_id).first() is not None:
-            name_short = URL_map.query.filter_by(short=custom_id).first().short
-            message = (f'Имя {name_short} уже занято!')
+            message = (f'Имя {custom_id} уже занято!')
             flash(message)
             return redirect(url_for('index_view'))
 
         if not custom_id:
-            custom_id = get_unique_short_id(6)
+            custom_id = get_unique_short_id(lenght_short_id)
+            if URL_map.query.filter_by(short=custom_id).first() is not None:
+                message = (f'Имя {custom_id} уже занято, нажмите "создать" ещё раз.')
+                flash(message)
+                return redirect(url_for('index_view'))
 
         new_link = URL_map(
-            original=original_link, short=custom_id, url=original_link, custom_id=custom_id, timestamp=datetime.now())
+            original=original_link, short=custom_id, timestamp=datetime.now())
         db.session.add(new_link)
         db.session.commit()
-        short_url = request.host_url + custom_id
+        short_url = url_for('link_view', short=custom_id, _external=True)
 
         return render_template('link.html', short_url=short_url, form=form)
 
@@ -44,9 +47,5 @@ def index_view():
 
 @app.route('/<short>')
 def link_view(short):
-    link = URL_map.query.filter_by(short=short).first()
-    if link:
-        return redirect(link.original)
-    else:
-        flash('Нерабочая ссылка!')
-        abort(404)
+    link = URL_map.query.filter_by(short=short).first_or_404()
+    return redirect(link.original)
