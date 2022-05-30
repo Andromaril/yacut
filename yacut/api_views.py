@@ -18,36 +18,61 @@ def random(custom_id):
 @app.route('/api/id/', methods=['POST'])
 def add_link():
 
-    try:
-        data = request.get_json()
-        if data:
-            data['url']
-    except Exception:
+    if request.json is None:
+        raise InvalidAPIUsage('Отсутствует тело запроса', HTTPStatus.BAD_REQUEST)
+    data = request.get_json()
+
+    if 'url' not in data:
         raise InvalidAPIUsage('"url" является обязательным полем!', HTTPStatus.BAD_REQUEST)
 
-    try:
-        data = request.get_json()
-        data['url']
-    except Exception:
-        raise InvalidAPIUsage('Отсутствует тело запроса', HTTPStatus.BAD_REQUEST)
-
-    if 'custom_id' not in data:
-        data['custom_id'] = get_unique_short_id(lenght_short_id)
-        random(data['custom_id'])
-
+    regex = "^[a-zA-Z0-9]{1,16}$"
+    pattern = re.compile(regex)
+    if data['custom_id']:
+        if pattern.search(data['custom_id']) is None:
+        #regex = "^[a-zA-Z0-9]{1,16}$"
+        #string = data['custom_id']
+        #pattern = re.compile(regex)
+        #if (pattern.search(string) is None):
+            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', HTTPStatus.BAD_REQUEST)
+        if URL_map.query.filter_by(short=data['custom_id']).first() is not None:
+            name = data['custom_id']
+            raise InvalidAPIUsage(f'Имя "{name}" уже занято.', HTTPStatus.BAD_REQUEST)
     elif not data['custom_id']:
         data['custom_id'] = get_unique_short_id(lenght_short_id)
-        random(data['custom_id'])
-    else:
-        regex = "^[a-zA-Z0-9]{1,16}$"
-        string = data['custom_id']
-        pattern = re.compile(regex)
-        if (pattern.search(string) is None):
-            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', HTTPStatus.BAD_REQUEST)
+        #link = URL_map(original=data['url'], short=data['custom_id'])
 
-    if URL_map.query.filter_by(short=data['custom_id']).first() is not None:
-        name = data['custom_id']
-        raise InvalidAPIUsage(f'Имя "{name}" уже занято.', HTTPStatus.BAD_REQUEST)
+    
+
+    #try:
+        #data = request.get_json()
+        #if data:
+            #data['url']
+    #except Exception:
+        #raise InvalidAPIUsage('"url" является обязательным полем!', HTTPStatus.BAD_REQUEST)
+
+    #try:
+        #data = request.get_json()
+        #data['url']
+    #except Exception:
+        #raise InvalidAPIUsage('Отсутствует тело запроса', HTTPStatus.BAD_REQUEST)
+
+    #if 'custom_id' not in data:
+        #data['custom_id'] = get_unique_short_id(lenght_short_id)
+        #random(data['custom_id'])
+
+    #elif not data['custom_id']:
+        #data['custom_id'] = get_unique_short_id(lenght_short_id)
+        #random(data['custom_id'])
+    #else:
+        #regex = "^[a-zA-Z0-9]{1,16}$"
+        #string = data['custom_id']
+        #pattern = re.compile(regex)
+        #if (pattern.search(string) is None):
+            #raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', HTTPStatus.BAD_REQUEST)
+
+    #if URL_map.query.filter_by(short=data['custom_id']).first() is not None:
+        #name = data['custom_id']
+        #raise InvalidAPIUsage(f'Имя "{name}" уже занято.', HTTPStatus.BAD_REQUEST)
 
     link = URL_map(original=data['url'], short=data['custom_id'])
     db.session.add(link)
