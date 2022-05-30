@@ -9,12 +9,6 @@ from .models import URL_map
 from .views import get_unique_short_id
 
 
-def random(custom_id):
-    if URL_map.query.filter_by(short=custom_id).first() is not None:
-        message = (f'Имя {custom_id} уже занято, отправьте запрос ещё раз.')
-        raise InvalidAPIUsage(message, HTTPStatus.BAD_REQUEST)
-
-
 @app.route('/api/id/', methods=['POST'])
 def add_link():
 
@@ -29,7 +23,7 @@ def add_link():
         raise InvalidAPIUsage('"url" является обязательным полем!', HTTPStatus.BAD_REQUEST)
 
     elif 'custom_id' in data:
-        if (data['custom_id']):
+        if data['custom_id']:
             if pattern.search(data['custom_id']) is None:
                 raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', HTTPStatus.BAD_REQUEST)
             if URL_map.query.filter_by(short=data['custom_id']).first() is not None:
