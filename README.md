@@ -9,7 +9,6 @@
 
 ```
 git clone https://github.com/Andromaril/yacut.git
-
 ```
 
 ```
@@ -43,3 +42,15 @@ python3 -m pip install --upgrade pip
 ```
 pip install -r requirements.txt
 ```
+
+В корне проекта создайте файл .env по образцу:
+
+```
+FLASK_APP=
+FLASK_ENV=
+DATABASE_URI=
+SECRET_KEY=
+```
+
+Выполните команду: flask run
+
